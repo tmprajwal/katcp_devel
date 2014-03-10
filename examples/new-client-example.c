@@ -1,7 +1,10 @@
-/* new client example to issue arbitrary katcp requests (with no parameters,
- * to simplify the example). This uses a simpler api than the client-example
- * code
- */
+/**************Roach:KATCP**************
+*Program to interact with Project      *
+*         Roach Board                  *
+*Author: Prajwal Mohanmurthy           *
+*        prajwal@mohanmurthy.com       *
+*        MIT LNS                       *
+****************************************/
 
 #include <stdio.h>
 #include <unistd.h>

@@ -1,4 +1,10 @@
-/* a simple server example which registers a couple of sensors and commands */
+/**************Roach:KATCP**************
+*Program to interact with Project      *
+*         Roach Board                  *
+*Author: Prajwal Mohanmurthy           *
+*        prajwal@mohanmurthy.com       *
+*        MIT LNS                       *
+****************************************/
 
 #include <stdio.h>
 #include <stdlib.h>

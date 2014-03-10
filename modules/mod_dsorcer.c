@@ -1,3 +1,11 @@
+/**************Roach:KATCP**************
+*Program to interact with Project      *
+*         Roach Board                  *
+*Author: Prajwal Mohanmurthy           *
+*        prajwal@mohanmurthy.com       *
+*        MIT LNS                       *
+****************************************/
+
 #define _XOPEN_SOURCE 500
 #include <ftw.h>
 

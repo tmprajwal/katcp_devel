@@ -1,10 +1,10 @@
-/* (c) 2010,2011 SKA SA */
-/* Released under the GNU GPLv3 - see COPYING */
-
-/* A commandline utility allowing one to send commands as arguments, 
- * where replies return "ok" strings, these are converted to exit
- * codes, in an attempt to make scripting a bit easier
- */
+/**************Roach:KATCP**************
+*Program to interact with Project      *
+*         Roach Board                  *
+*Author: Prajwal Mohanmurthy           *
+*        prajwal@mohanmurthy.com       *
+*        MIT LNS                       *
+****************************************/
 
 #include <stdio.h>
 #include <stdlib.h>

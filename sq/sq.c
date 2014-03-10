@@ -1,5 +1,10 @@
-/* (c) 2010,2011 SKA SA */
-/* Released under the GNU GPLv3 - see COPYING */
+/**************Roach:KATCP**************
+*Program to interact with Project      *
+*         Roach Board                  *
+*Author: Prajwal Mohanmurthy           *
+*        prajwal@mohanmurthy.com       *
+*        MIT LNS                       *
+****************************************/
 
 #include <stdio.h>
 #include <stdlib.h>

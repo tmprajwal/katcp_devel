@@ -1,6 +1,10 @@
-/* module to perform monitoring on fengine gateware */
-
-/* WARNING: this is poorly written interrim code, to be redone in zmon */
+/**************Roach:KATCP**************
+*Program to interact with Project      *
+*         Roach Board                  *
+*Author: Prajwal Mohanmurthy           *
+*        prajwal@mohanmurthy.com       *
+*        MIT LNS                       *
+****************************************/
 
 #include <stdio.h>
 #include <string.h>
