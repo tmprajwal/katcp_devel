@@ -21,6 +21,8 @@
 #include "katcp.h"
 #include "katcl.h"
 
+using namespace std;
+
 /* supporting logic starts here */
 
 static int dispatch_client(struct katcl_line *l, char *msgname, int verbose, unsigned int timeout)
@@ -189,6 +191,23 @@ int borph_read(struct katcl_line *l, char *regname, void *buffer, int len, unsig
   return len;
 }
 
+int main()
+{
+	char *server;
+	int fd;
+	server = getenv("KATCP_SERVER");
+	
+	if(server == NULL)
+	{
+    	fprintf(stderr, "need a server as first argument or in the KATCP_SERVER variable\n");
+    	return 2;
+	}
+
+	fd = net_connect(server, 0, NETC_VERBOSE_ERRORS | NETC_VERBOSE_STATS);
+	printf("%s\n","Done!");
+}
+	
+/*
 int main(int argc, char **argv)
 {
   char *server;
@@ -224,7 +243,7 @@ int main(int argc, char **argv)
     return 2;
   }
 
-  /* careful - intel integers little endian */
+  // careful - intel integers little endian
   data[0] = 0xde;
   data[1] = 0xad;
   data[2] = 0xbe;
@@ -239,3 +258,4 @@ int main(int argc, char **argv)
 
   return 0;
 }
+*/

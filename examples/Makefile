@@ -4,7 +4,7 @@ include ../Makefile.inc
 
 INC = -I$(KATCP)
 LIB = -L$(KATCP) -lkatcp
-BUILD = unknown-0.1
+BUILD = roach
 
 EXE = new-client-example client-example server-example 
 
@@ -13,7 +13,7 @@ all: $(EXE)
 new-client-example: new-client-example.c
 	$(CC) -DBUILD=\"$(BUILD)\" $(CFLAGS) $(INC) -o $@ $^ $(LIB)
 
-client-example: client-example.c
+client-example: client-example.cxx
 	$(CC) -DBUILD=\"$(BUILD)\" $(CFLAGS) $(INC) -o $@ $^ $(LIB)
 
 server-example: server-example.c
@@ -24,4 +24,3 @@ clean:
 
 install: $(EXE)
 	$(ECHO) "not installing examples"
-
