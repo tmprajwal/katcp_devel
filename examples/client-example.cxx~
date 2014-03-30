@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdint.h>
 
 #include <sys/select.h>
 #include <sys/time.h>
@@ -144,11 +145,11 @@ static int dispatch_client(struct katcl_line *l, char *msgname, int verbose, uns
 int borph_prog(struct katcl_line *l, char *boffile, unsigned int timeout)
 {
   /* populate a request */
-  if(append_string_katcl(l, KATCP_FLAG_FIRST, "?progdev") < 0) return -1;
+  if(append_string_katcl(l, KATCP_FLAG_FIRST, const_cast<char*>("?progdev")) < 0) return -1;
   if(append_string_katcl(l, KATCP_FLAG_LAST, boffile)     < 0) return -1;
   
   /* use above function to send request */
-  if(dispatch_client(l, "!progdev", 1, timeout)             < 0) return -1;
+  if(dispatch_client(l, const_cast<char*>("!progdev"), 1, timeout)             < 0) return -1;
 
   /* clean up request for next call */
   have_katcl(l);
@@ -156,16 +157,17 @@ int borph_prog(struct katcl_line *l, char *boffile, unsigned int timeout)
   return 0;
 }
 
-int borph_write(struct katcl_line *l, char *regname, void *buffer, int len, unsigned int timeout)
+int borph_write(struct katcl_line *l, char *regname, int buffer, int len, unsigned int timeout)
 {
   /* populate a request */
-  if(append_string_katcl(l, KATCP_FLAG_FIRST, "?write")   < 0) return -1;
+  if(append_string_katcl(l, KATCP_FLAG_FIRST, const_cast<char*>("?write"))   < 0) return -1;
   if(append_string_katcl(l, 0, regname)                   < 0) return -1;
   if(append_unsigned_long_katcl(l, 0, 0)                  < 0) return -1;
-  if(append_buffer_katcl(l, KATCP_FLAG_LAST, buffer, len) < 0) return -1;
+  if(append_unsigned_long_katcl(l, 0, buffer)             < 0) return -1;
+  if(append_unsigned_long_katcl(l, KATCP_FLAG_LAST, len)         < 0) return -1;
 
   /* use above function to send request */
-  if(dispatch_client(l, "!write", 1, timeout)             < 0) return -1;
+  if(dispatch_client(l, const_cast<char*>("!write"), 1, timeout)             < 0) return -1;
 
   /* clean up request for next call */
   have_katcl(l);
@@ -179,12 +181,12 @@ int borph_read(struct katcl_line *l, char *regname, void *buffer, int len, unsig
 {
   int count, got;
 
-  if(append_string_katcl(l, KATCP_FLAG_FIRST, "?read")    < 0) return -1;
+  if(append_string_katcl(l, KATCP_FLAG_FIRST, const_cast<char*>("?read"))    < 0) return -1;
   if(append_string_katcl(l, 0, regname)                   < 0) return -1;
   if(append_unsigned_long_katcl(l, 0, 0)                  < 0) return -1;
   if(append_unsigned_long_katcl(l, KATCP_FLAG_LAST, len)  < 0) return -1;
 
-  if(dispatch_client(l, "!read", 1, timeout)              < 0) return -1;
+  if(dispatch_client(l, const_cast<char*>("!read"), 1, timeout)              < 0) return -1;
 
   count = arg_count_katcl(l);
   if(count < 2){
@@ -209,16 +211,26 @@ int main()
 	char *server;
 	int fd;
 	struct katcl_line *l;
-	unsigned char data[65536*4];
-	char *boffile = "adc.bof";
-	printf("%s \n",boffile);
 	
+	//Place to set vitals
+	const int RM_recordSize = 65536*4;
+	int RM_timeout = 5000; /*Time out in ms*/
+	char *boffile = const_cast<char*>("adc.bof");
 	server = getenv("KATCP_SERVER");
+	//
+	
+	unsigned char datax[RM_recordSize];
+	unsigned char datax1[RM_recordSize];
+	uint8_t datay[RM_recordSize*2];
+	
+	printf("%s","RoachMantis: Boffile set to: ");
+	printf("%s \n",boffile);
+	printf("%s","RoachMantis: Server IP set to: ");
 	printf("%s \n",server);
 	
     if(server == NULL)
 	{
-    	fprintf(stderr, "need a server as first argument or in the KATCP_SERVER variable\n");
+    	printf("%s \n", "Roachmantis: Need a server as first argument or in the KATCP_SERVER variable");
     	return 2;
 	}
 	else
@@ -229,7 +241,8 @@ int main()
 	fd = net_connect(server, 0, NETC_VERBOSE_ERRORS | NETC_VERBOSE_STATS);
     if(fd < 0)
     {
-        fprintf(stderr, "unable to connect to %s\n", server);
+        printf("%s", "Roachmantis: Unable to connect to");
+        printf("%s \n", server);
         return 2;
     }
     else
@@ -240,7 +253,7 @@ int main()
     l = create_katcl(fd);
     if(l == NULL)
     {
-        fprintf(stderr, "unable to allocate state\n");
+        printf("%s \n", "Roachmantis: Unable to allocate state");
         return 2;
     }
     else
@@ -248,9 +261,9 @@ int main()
         printf ("%s \n", "RoachMantis: State allocated");
     }
     
-    if(borph_prog(l, boffile, 50000) < 0)
+    if(borph_prog(l, boffile, RM_timeout) < 0)
     {
-        fprintf(stderr, "unable to program FPGA\n");
+        printf("%s \n", "Roachmantis: Unable to program FPGA");
         return 2;
     }
     else
@@ -258,18 +271,56 @@ int main()
         printf("%s", "Roachmantis: FPGA programmed with: ");
         printf("%s \n", boffile);
     }
-    
-    if(borph_read(l, "snap64_bram_msb", data, 65536*4, 50000) < 0)
+ 
+    if(borph_write(l, const_cast<char*>("snap64_ctrl"), 0, 00, RM_timeout) < 0)
     {
-        fprintf(stderr, "unable to read register\n");
+        printf("%s \n", "Roachmantis: Unable to write to register - 'snap64_ctrl'");
         return 2;
     }
     else
     {
-        printf("%s \n", "Roachmantis: read - 'snap64_bram_msb'");
+        printf("%s \n", "Roachmantis: Wrote - 'snap64_ctrl'");
+    }
+    if(borph_write(l, const_cast<char*>("snap64_ctrl"), 0, 0111, RM_timeout) < 0)
+    {
+        printf("%s \n", "Roachmantis: Unable to write to register - 'snap64_ctrl'");
+        return 2;
+    }
+    else
+    {
+        printf("%s \n", "Roachmantis: Wrote - 'snap64_ctrl'");
     }
   
-	printf("%s\n","Done!");
+    /////////////////////////////////////////////////////////////////////////
+    
+    if(borph_read(l, const_cast<char*>("snap64_bram_msb"), datax, RM_recordSize, RM_timeout) < 0)
+    {
+        printf("%s \n", "Roachmantis: Unable to read register 'snap64_bram_msb'");
+        return 2;
+    }
+    else
+    {
+        printf("%s \n", "Roachmantis: Read - 'snap64_bram_msb'");
+    }
+    //printf("%d \n",(uint8_t)(datax[1]));
+    
+    if(borph_read(l, const_cast<char*>("snap64_bram_lsb"), datax1, RM_recordSize, RM_timeout) < 0)
+    {
+        printf("%s \n", "Roachmantis: Unable to read register 'snap64_bram_lsb'");
+        return 2;
+    }
+    else
+    {
+        printf("%s \n", "Roachmantis: Read - 'snap64_bram_lsb'");
+    }
+    printf("%s \n","Done-1!");
+    for(int RM_count = 0; RM_count<(RM_recordSize); RM_count+=2)
+    {
+        datay[RM_count*2] = (uint8_t)(datax[RM_count]);
+        datay[(RM_count*2)+1] = (uint8_t)(datax1[RM_count]);
+    }
+
+	printf("%s \n","Done!");
 }
 	
 /*
